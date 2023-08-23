@@ -1,0 +1,45 @@
+version: '3'
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - mynetwork
+
+  mqtt_publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile.mqtt_publisher
+    networks:
+      - mynetwork
+
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mqtt_publisher
+      - mongodb
+      - redis
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
